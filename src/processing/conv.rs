@@ -11,7 +11,7 @@ pub trait ConvolutionExt
 where
     Self: Sized,
 {
-    /// Underlying data type to perform the colution on 
+    /// Underlying data type to perform the colution on
     type Data;
 
     /// Perform a convolution returning the resultant data

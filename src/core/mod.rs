@@ -1,5 +1,4 @@
-
-/// This module deals with different colour models and conversions between 
+/// This module deals with different colour models and conversions between
 /// colour models.
 pub mod colour_models;
 /// Core image type and simple operations on it
