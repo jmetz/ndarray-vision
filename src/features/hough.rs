@@ -1,6 +1,6 @@
 use crate::core::Image;
-use ndarray::{prelude::*, Data};
-use std::marker::PhantomData;
+use ndarray::{prelude::*, Data, Zip};
+use num_traits::float::FloatConst;
 
 /// Contains the parameters of the Hough transform. As this is a generalised
 /// Hough Transform, for each rotation of the target shape there is an
@@ -10,47 +10,42 @@ use std::marker::PhantomData;
 /// search resolution
 ///
 /// Assume all angles are in Radians.
-pub struct HoughParameters<T, D, F>
-where
-    D: Dimension,
-    F: Sized + (Fn(f64) -> Array1<T>),
-{
+pub struct HoughParameters<T> {
     /// Parameter bounds
     pub bounds: Array2<T>,
     /// Search resolution for each parameter. Should be the same size as bounds.
     pub resolution: Option<Array1<T>>,
-    /// Function that taking an angle returns the n-dimensioned point in Hough
-    /// Space that the entry would belong to. Output should be same dimensions
-    /// as bounds.
-    pub get_params: F,
-    /// Represents the dimensionality of the hough space
-    pub dim: PhantomData<D>,
+}
+
+pub trait HoughSearch<T> {
+    fn get_entry(&self, coordinate: (usize, usize), params: &HoughParameters<T>) -> Array2<T>;
 }
 
 /// Trait for a general Hough Transform.
-pub trait GeneralisedHoughTransformExt<T, D, F>
-where
-    D: Dimension,
-    F: Sized + (Fn(f64) -> Array1<T>),
-{
+pub trait GeneralisedHoughTransformExt {
     /// Given the `HoughParameters` return the accumulated view of the Hough Space
-    fn hough<S>(&self, d_theta: f64, params: HoughParameters<T, D, F>) -> ArrayBase<S, D>
+    fn hough<T, D, S, Search>(
+        &self,
+        params: HoughParameters<T>,
+        search: &Search,
+    ) -> ArrayBase<S, D>
     where
-        S: Data<Elem = usize>;
+        S: Data<Elem = usize>,
+        Search: HoughSearch<T>;
 }
 
-
-impl<T, D, F, S> GeneralisedHoughTransformExt<T, D, F> for Array2<S>
-where 
-    D: Dimension,
-    S: Data<Elem = bool>,
-    F: Sized + (Fn(f64) -> Array1<T>),
+impl<U> GeneralisedHoughTransformExt for Array2<U>
+where
+    U: Data<Elem = bool>,
 {
-
-    fn hough<U>(&self, d_theta: f64, params: HoughParameters<T, D, F>) -> ArrayBase<U, D> 
+    fn hough<T, D, S, Search>(&self, params: HoughParameters<T>, search: &Search) -> ArrayBase<S, D>
     where
-        U: Data<Elem = usize>
+        S: Data<Elem = usize>,
+        Search: HoughSearch<T>,
     {
+        // Get all accumulator entries for coordinate (0, 0)
+        let _entry = search.get_entry((0, 0), &params);
+
         unimplemented!();
     }
 }
