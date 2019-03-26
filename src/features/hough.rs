@@ -32,7 +32,7 @@ impl<T> HoughParameters<T> {
 }
 
 pub trait HoughSearch<T> {
-    fn get_entry(&self, coordinate: (usize, usize), params: &HoughParameters<T>) -> Array2<T>;
+    fn get_entries(&self, coordinate: (usize, usize), params: &HoughParameters<T>) -> Array2<T>;
 }
 
 /// Trait for a general Hough Transform.
@@ -48,18 +48,19 @@ pub trait GeneralisedHoughTransformExt {
         Search: HoughSearch<T>;
 }
 
-impl<U> GeneralisedHoughTransformExt for Array2<U>
-where
-    U: Data<Elem = bool>,
+impl GeneralisedHoughTransformExt for Array2<bool>
 {
     fn hough<T, D, S, Search>(&self, params: HoughParameters<T>, search: &Search) -> ArrayBase<S, D>
     where
         S: Data<Elem = usize>,
         Search: HoughSearch<T>,
     {
-        // Get all accumulator entries for coordinate (0, 0)
-        let _entry = search.get_entry((0, 0), &params);
-
+        // work out dimensions of accumulator from parameters 
+        for i in self.indexed_iter().filter(|(_, b)| **b).map(|(i, _)| i) {
+            let _entries = search.get_entries(i, &params);
+            // Add to accumulator
+        }
+        // Return accumulator
         unimplemented!();
     }
 }
