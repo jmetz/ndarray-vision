@@ -17,6 +17,20 @@ pub struct HoughParameters<T> {
     pub resolution: Option<Array1<T>>,
 }
 
+impl<T> HoughParameters<T> {
+    fn is_valid(&self) -> bool {
+        let shape = self.bounds.dim();
+        if shape.0 != 2 {
+            false
+        } else {
+            match self.resolution {
+                Some(ref s) => s.dim() == shape.1,
+                None => true,
+            }
+        }
+    }
+}
+
 pub trait HoughSearch<T> {
     fn get_entry(&self, coordinate: (usize, usize), params: &HoughParameters<T>) -> Array2<T>;
 }
@@ -47,5 +61,45 @@ where
         let _entry = search.get_entry((0, 0), &params);
 
         unimplemented!();
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parameters() {
+        let x = HoughParameters {
+            bounds: arr2(&[[0, 1, 2]]),
+            resolution: None,
+        };
+        assert_eq!(x.is_valid(), false);
+        
+        let x = HoughParameters {
+            bounds: arr2(&[[0, 1, 2], [1, 2, 3]]),
+            resolution: None,
+        };
+
+        assert!(x.is_valid());
+        
+        let x = HoughParameters {
+            bounds: arr2(&[[0, 1, 2], [0, 1, 2], [0, 0, 0]]),
+            resolution: None,
+        };
+        assert_eq!(x.is_valid(), false);
+
+        let x = HoughParameters {
+            bounds: arr2(&[[0, 2],[1, 3]]),
+            resolution: Some(arr1(&[1, 2])),
+        };
+        assert!(x.is_valid());
+
+        let x = HoughParameters {
+            bounds: arr2(&[[0, 2],[1, 3]]),
+            resolution: Some(arr1(&[1, 2, 3])),
+        };
+        assert_eq!(x.is_valid(), false);
     }
 }
