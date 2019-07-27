@@ -48,6 +48,11 @@ pub trait GeneralisedHoughTransformExt {
         Search: HoughSearch<T>;
 }
 
+pub struct HoughResult<S, D> where S: Data<Elem = usize> {
+    accumulator: ArrayBase<S, D>,
+    params: HoughParameters<T>,
+}
+
 impl GeneralisedHoughTransformExt for Array2<bool>
 {
     fn hough<T, D, S, Search>(&self, params: HoughParameters<T>, search: &Search) -> ArrayBase<S, D>
